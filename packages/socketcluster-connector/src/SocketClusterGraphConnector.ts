@@ -84,7 +84,7 @@ export class SocketClusterGraphConnector extends GunGraphWireConnector {
   }): () => void {
     if (!graph) {
       // tslint:disable-next-line: no-empty
-      return () => {};
+      return () => { };
     }
 
     const id = msgId || generateMessageId();
@@ -133,7 +133,7 @@ export class SocketClusterGraphConnector extends GunGraphWireConnector {
                 if (err || rejection) {
                   fail(err || rejection);
                 } else {
-                  ok();
+                  ok(null);
                 }
               }
             );

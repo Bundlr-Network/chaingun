@@ -1,28 +1,28 @@
-import { importAesKey } from './importAesKey'
-import { parse } from './settings'
-import { Buffer, crypto, TextDecoder } from './shims'
+import { importAesKey } from './importAesKey';
+import { parse } from './settings';
+import { Buffer, crypto, TextDecoder } from './shims';
 
 const DEFAULT_OPTS: {
-  readonly name?: string
-  readonly encode?: string
-  readonly fallback?: string
+  readonly name?: string;
+  readonly encode?: string;
+  readonly fallback?: string;
 } = {
   encode: 'base64',
   name: 'AES-GCM'
-}
+};
 
 export async function decrypt(
   data: string,
   key: string,
   opt = DEFAULT_OPTS
 ): Promise<GunValue> {
-  const json: any = parse(data)
-  const encoding = opt.encode || DEFAULT_OPTS.encode
+  const json: any = parse(data);
+  const encoding = opt.encode || DEFAULT_OPTS.encode;
 
   try {
-    const aeskey = await importAesKey(key, Buffer.from(json.s, encoding), opt)
-    const encrypted = new Uint8Array(Buffer.from(json.ct, encoding))
-    const iv = new Uint8Array(Buffer.from(json.iv, encoding))
+    const aeskey = await importAesKey(key, Buffer.from(json.s, encoding), opt);
+    const encrypted = new Uint8Array(Buffer.from(json.ct, encoding));
+    const iv = new Uint8Array(Buffer.from(json.iv, encoding));
     const ct = await crypto.subtle.decrypt(
       {
         iv,
@@ -31,15 +31,15 @@ export async function decrypt(
       },
       aeskey,
       encrypted
-    )
-    return parse(new TextDecoder('utf8').decode(ct))
-  } catch (e) {
+    );
+    return parse(new TextDecoder('utf8').decode(ct));
+  } catch (e: any) {
     // tslint:disable-next-line: no-console
-    console.warn('decrypt error', e, e.stack || e)
+    console.warn('decrypt error', e, e.stack || e);
 
     if (!opt.fallback || encoding === opt.fallback) {
-      throw new Error('Could not decrypt')
+      throw new Error('Could not decrypt');
     }
-    return decrypt(data, key, { ...opt, encode: opt.fallback })
+    return decrypt(data, key, { ...opt, encode: opt.fallback });
   }
 }

@@ -1,35 +1,35 @@
-import { authenticate, createUser, graphSigner } from '@chaingun/sear'
-import { ChainGunSeaClient } from './ChainGunSeaClient'
+import { authenticate, createUser, graphSigner } from '@chaingun/sear';
+import { ChainGunSeaClient } from './ChainGunSeaClient';
 
 interface UserReference {
-  readonly alias: string
-  readonly pub: string
+  readonly alias: string;
+  readonly pub: string;
 }
 
 interface AckErr {
-  readonly err: Error
+  readonly err: Error;
 }
 
 interface UserCredentials {
-  readonly priv: string
-  readonly epriv: any
-  readonly alias: string
-  readonly pub: string
-  readonly epub: string
+  readonly priv: string;
+  readonly epriv: any;
+  readonly alias: string;
+  readonly pub: string;
+  readonly epub: string;
 }
 
-type LoginCallback = (userRef: UserReference | AckErr) => void
+type LoginCallback = (userRef: UserReference | AckErr) => void;
 
-const DEFAULT_CREATE_OPTS = {}
-const DEFAULT_AUTH_OPTS = {}
+const DEFAULT_CREATE_OPTS = {};
+const DEFAULT_AUTH_OPTS = {};
 
 export class ChainGunUserApi {
-  public readonly is?: UserReference
-  private readonly _gun: ChainGunSeaClient
-  private readonly _signMiddleware?: (graph: any) => Promise<any>
+  public readonly is?: UserReference;
+  private readonly _gun: ChainGunSeaClient;
+  private readonly _signMiddleware?: (graph: any) => Promise<any>;
 
   constructor(gun: ChainGunSeaClient) {
-    this._gun = gun
+    this._gun = gun;
   }
 
   /**
@@ -47,21 +47,21 @@ export class ChainGunUserApi {
     cb?: LoginCallback,
     _opt = DEFAULT_CREATE_OPTS
   ): Promise<{
-    readonly alias: string
-    readonly pub: string
+    readonly alias: string;
+    readonly pub: string;
   }> {
     try {
-      const user = await createUser(this._gun, alias, password)
-      const ref = this.useCredentials(user)
+      const user = await createUser(this._gun, alias, password);
+      const ref = this.useCredentials(user);
       if (cb) {
-        cb(ref)
+        cb(ref);
       }
-      return ref
-    } catch (err) {
+      return ref;
+    } catch (err: any) {
       if (cb) {
-        cb({ err })
+        cb({ err });
       }
-      throw err
+      throw err;
     }
   }
 
@@ -80,21 +80,21 @@ export class ChainGunUserApi {
     cb?: LoginCallback,
     _opt = DEFAULT_AUTH_OPTS
   ): Promise<{
-    readonly alias: string
-    readonly pub: string
+    readonly alias: string;
+    readonly pub: string;
   }> {
     try {
-      const user = await authenticate(this._gun, alias, password)
-      const ref = this.useCredentials(user)
+      const user = await authenticate(this._gun, alias, password);
+      const ref = this.useCredentials(user);
       if (cb) {
-        cb(ref)
+        cb(ref);
       }
-      return ref
-    } catch (err) {
+      return ref;
+    } catch (err: any) {
       if (cb) {
-        cb({ err })
+        cb({ err });
       }
-      throw err
+      throw err;
     }
   }
 
@@ -103,37 +103,37 @@ export class ChainGunUserApi {
    */
   public leave(): ChainGunUserApi {
     if (this._signMiddleware) {
-      this._gun.graph.unuse(this._signMiddleware, 'write')
+      this._gun.graph.unuse(this._signMiddleware, 'write');
       // @ts-ignore
       // tslint:disable-next-line: no-object-mutation
-      this._signMiddleware = undefined
+      this._signMiddleware = undefined;
       // @ts-ignore
       // tslint:disable-next-line: no-object-mutation
-      this.is = undefined
+      this.is = undefined;
     }
 
-    return this
+    return this;
   }
 
   public useCredentials(
     credentials: UserCredentials
   ): {
-    readonly alias: string
-    readonly pub: string
+    readonly alias: string;
+    readonly pub: string;
   } {
-    this.leave()
+    this.leave();
     // @ts-ignore
     // tslint:disable-next-line: no-object-mutation
     this._signMiddleware = graphSigner({
       priv: credentials.priv,
       pub: credentials.pub
-    })
-    this._gun.graph.use(this._signMiddleware, 'write')
+    });
+    this._gun.graph.use(this._signMiddleware, 'write');
     // @ts-ignore
     // tslint:disable-next-line: no-object-mutation
     return (this.is = {
       alias: credentials.alias,
       pub: credentials.pub
-    })
+    });
   }
 }

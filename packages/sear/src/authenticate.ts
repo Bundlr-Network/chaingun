@@ -1,7 +1,7 @@
-import { decrypt } from './decrypt'
-import { work } from './work'
+import { decrypt } from './decrypt';
+import { work } from './work';
 
-const DEFAULT_OPTS = {}
+const DEFAULT_OPTS = {};
 
 export async function authenticateAccount(
   ident: any,
@@ -10,33 +10,33 @@ export async function authenticateAccount(
 ): Promise<
   | undefined
   | {
-      readonly alias: string
-      readonly epriv: string
-      readonly epub: string
-      readonly priv: string
-      readonly pub: string
-    }
+    readonly alias: string;
+    readonly epriv: string;
+    readonly epub: string;
+    readonly priv: string;
+    readonly pub: string;
+  }
 > {
   if (!ident || !ident.auth) {
-    return
+    return;
   }
 
   // tslint:disable-next-line: no-let
-  let decrypted: any
+  let decrypted: any;
   try {
-    const proof = await work(password, ident.auth.s, { encode: encoding })
+    const proof = await work(password, ident.auth.s, { encode: encoding });
     decrypted = await decrypt(ident.auth.ek, proof, {
       encode: encoding
-    })
+    });
   } catch (err) {
-    const proof = await work(password, ident.auth.s, { encode: 'utf8' })
+    const proof = await work(password, ident.auth.s, { encode: 'utf8' });
     decrypted = await decrypt(ident.auth.ek, proof, {
       encode: encoding
-    })
+    });
   }
 
   if (!decrypted) {
-    return
+    return;
   }
 
   return {
@@ -45,7 +45,7 @@ export async function authenticateAccount(
     epub: ident.epub as string,
     priv: decrypted.priv as string,
     pub: ident.pub as string
-  }
+  };
 }
 
 export async function authenticateIdentity(
@@ -56,15 +56,15 @@ export async function authenticateIdentity(
 ): Promise<
   | undefined
   | {
-      readonly alias: string
-      readonly epriv: string
-      readonly epub: string
-      readonly priv: string
-      readonly pub: string
-    }
+    readonly alias: string;
+    readonly epriv: string;
+    readonly epub: string;
+    readonly priv: string;
+    readonly pub: string;
+  }
 > {
-  const ident = await chaingun.get(soul).then()
-  return authenticateAccount(ident, password, encoding)
+  const ident = await chaingun.get(soul).then();
+  return authenticateAccount(ident, password, encoding);
 }
 
 export async function authenticate(
@@ -73,33 +73,33 @@ export async function authenticate(
   password: string,
   _opt = DEFAULT_OPTS
 ): Promise<{
-  readonly alias: string
-  readonly epriv: string
-  readonly epub: string
-  readonly priv: string
-  readonly pub: string
+  readonly alias: string;
+  readonly epriv: string;
+  readonly epub: string;
+  readonly priv: string;
+  readonly pub: string;
 }> {
-  const aliasSoul = `~@${alias}`
-  const idents = await chaingun.get(aliasSoul).then()
+  const aliasSoul = `~@${alias}`;
+  const idents = await chaingun.get(aliasSoul).then();
   for (const soul in idents || {}) {
     if (soul === '_') {
-      continue
+      continue;
     }
 
     // tslint:disable-next-line: no-let
-    let pair
+    let pair;
 
     try {
-      pair = await authenticateIdentity(chaingun, soul, password)
-    } catch (e) {
+      pair = await authenticateIdentity(chaingun, soul, password);
+    } catch (e: any) {
       // tslint:disable-next-line: no-console
-      console.warn(e.stack || e)
+      console.warn(e.stack || e);
     }
 
     if (pair) {
-      return pair
+      return pair;
     }
   }
 
-  throw new Error('Wrong alias or password.')
+  throw new Error('Wrong alias or password.');
 }
